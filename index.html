@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulta de Tabelas</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="container">
+        <h1>Consulta de Tabelas</h1>
+
+        <!-- Botão para alternar entre modo escuro/claro -->
+        <button id="toggleTheme" class="theme-btn">Modo Escuro</button>
+
+        <!-- Seção para selecionar a tabela -->
+        <label for="table">Selecione a Tabela</label>
+        <select id="table">
+            <!-- Opções carregadas via JavaScript -->
+        </select>
+
+        <!-- Seção para selecionar os campos da tabela -->
+        <label for="fields">Selecione os Campos</label>
+        <select id="fields" multiple>
+            <!-- Campos carregados via JavaScript -->
+        </select>
+
+        <!-- Seção para configurar os JOINs -->
+        <label for="join">Selecione um JOIN</label>
+        <select id="join">
+            <!-- Opções carregadas via JavaScript -->
+        </select>
+
+        <!-- Botão para executar a consulta -->
+        <button onclick="executarConsulta()" class="exec-btn">Executar Consulta</button>
+
+        <!-- Div para exibir o resultado da consulta -->
+        <div id="result"></div>
+
+        <h2>Criar Nova Tabela</h2>
+
+        <!-- Seção para criar uma nova tabela -->
+        <label for="newTableName">Nome da Tabela:</label>
+        <input type="text" id="newTableName" placeholder="Ex: Livros">
+
+        <!-- Campos para a criação da tabela -->
+        <label for="newTableFields">Campos da Tabela:</label>
+        <div id="fieldContainer">
+            <div class="field-group">
+                <input type="text" class="field-name" placeholder="Nome do Campo (Ex: id)">
+                <input type="text" class="field-value" placeholder="Valor (Ex: 1)">
+            </div>
+        </div>
+
+        <!-- Botão para adicionar mais campos -->
+        <button id="addField" type="button">Adicionar Campo</button>
+
+        <!-- Seção para adicionar chaves estrangeiras -->
+        <label for="foreignKey">Definir Chave Estrangeira (opcional):</label>
+        <div id="foreignKeyContainer">
+            <div class="foreign-key-group">
+                <input type="text" class="foreign-key-column" placeholder="Coluna Local (Ex: escolaId)">
+                <input type="text" class="foreign-key-ref" placeholder="Tabela Referenciada (Ex: escolas)">
+                <input type="text" class="foreign-key-ref-column" placeholder="Coluna Referenciada (Ex: id)">
+            </div>
+        </div>
+        <button id="addForeignKey" type="button">Adicionar Chave Estrangeira</button>
+
+        <!-- Botão para criar a nova tabela -->
+        <button onclick="criarNovaTabela()">Criar Tabela</button>
+
+        <!-- Botões para editar e excluir tabelas -->
+        <h2>Editar ou Excluir Tabela</h2>
+
+        <!-- Dropdown para selecionar uma tabela para editar ou excluir -->
+        <label for="editTable">Selecione a Tabela para Editar/Excluir:</label>
+        <select id="editTable">
+            <option value="">Selecione uma Tabela</option>
+        </select>
+
+        <!-- Botão para editar tabela -->
+        <button onclick="editarTabela()" id="editButton" class="exec-btn">Editar Tabela</button>
+
+        <!-- Botão para excluir tabela -->
+        <button onclick="excluirTabela()" id="deleteButton" class="exec-btn">Excluir Tabela</button>
+
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
