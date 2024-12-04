@@ -1,173 +1,129 @@
-/* Estilos Gerais */
+/* Estilo geral da página */
 body {
-    font-family: 'Arial', sans-serif;
+    font-family: Arial, sans-serif;
     margin: 0;
-    padding: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    background-color: #f4f4f4;
-    color: #333;
+    padding: 20px;
+    background: linear-gradient(135deg, #1a1a40, #4a4aff);
+    color: #fff;
     transition: background-color 0.3s, color 0.3s;
 }
 
+/* Modo escuro */
+.dark-mode {
+    background: linear-gradient(135deg, #000000, #2b2b6f);
+    color: #fff;
+}
+
+/* Container principal */
 .container {
-    background-color: #fff;
+    display: flex;
+    justify-content: space-between;
+    max-width: 1200px;
+    margin: 0 auto;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+}
+
+/* Painéis */
+.left-panel, .right-panel {
+    width: 48%;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.3);
     border-radius: 10px;
-    padding: 30px;
-    width: 80%;
-    max-width: 600px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    transition: background-color 0.3s, box-shadow 0.3s;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
 }
 
-h1 {
+/* Títulos */
+h1, h2 {
+    color: #fff;
     text-align: center;
-    color: #333;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    font-size: 1.5rem;
+    background: linear-gradient(to right, #ff4dff, #4a90e2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
-/* Estilo para as labels */
-label {
-    display: block;
-    margin-top: 15px;
-    font-size: 16px;
-    font-weight: bold;
-}
-
-/* Estilo para os Inputs, Selects e Botões */
-select, button {
+/* Botões */
+button {
     width: 100%;
     padding: 10px;
-    border-radius: 8px;
-    border: 1px solid #ddd;
-    font-size: 16px;
     margin-top: 10px;
-    transition: background-color 0.3s, border 0.3s;
-}
-
-select:focus, button:focus {
-    outline: none;
-    border: 1px solid #007BFF;
-}
-
-button {
-    background-color: #007BFF;
-    color: white;
+    background: linear-gradient(90deg, #4a90e2, #ff4dff);
+    border: none;
+    border-radius: 25px;
+    color: #fff;
+    font-weight: bold;
     cursor: pointer;
+    transition: all 0.3s ease;
 }
 
 button:hover {
-    background-color: #0056b3;
+    transform: scale(1.05);
+    background: linear-gradient(90deg, #ff4dff, #4a90e2);
+    box-shadow: 0 0 10px #ff4dff;
 }
 
-button.theme-btn {
-    background-color: #28a745;
+/* Botões especiais */
+.delete-table-btn {
+    background: linear-gradient(90deg, #ff4d4d, #d12b2b);
 }
 
-button.theme-btn:hover {
-    background-color: #218838;
+.delete-table-btn:hover {
+    background: linear-gradient(90deg, #d12b2b, #ff4d4d);
 }
 
-/* Resultados da consulta */
-#result {
-    margin-top: 20px;
-    padding: 15px;
-    border: 1px solid #ccc;
-    background-color: #f9f9f9;
-    border-radius: 8px;
-    font-family: 'Courier New', Courier, monospace;
-    white-space: pre-wrap;
-    word-wrap: break-word;
+.create-table-btn {
+    background: linear-gradient(90deg, #4dff88, #2bd167);
 }
 
-/* Modo Escuro */
-body.dark-mode {
-    background-color: #121212; /* Fundo escuro */
-    color: #e0e0e0; /* Cor do texto claro */
+.create-table-btn:hover {
+    background: linear-gradient(90deg, #2bd167, #4dff88);
 }
 
-body.dark-mode .container input,
-body.dark-mode .container select,
-body.dark-mode .container button {
-    background-color: #333; /* Cor de fundo escura para campos de input */
-    color: #e0e0e0; /* Cor do texto nos campos de input */
-}
-
-body.dark-mode .container .field-name,
-body.dark-mode .container .field-value {
-    background-color: #333; /* Cor de fundo escura para campos de texto */
-    color: #e0e0e0; /* Cor do texto nos campos de texto */
-}
-
-body.dark-mode header {
-    background-color: #1c1c1c; /* Cor de fundo escura para cabeçalhos */
-    color: #e0e0e0; /* Cor do texto do cabeçalho */
-}
-
-body.dark-mode footer {
-    background-color: #1c1c1c; /* Cor de fundo escura para o rodapé */
-    color: #e0e0e0; /* Cor do texto do rodapé */
-}
-
-body.dark-mode a {
-    color: #bb86fc; /* Links em modo escuro */
-}
-
-body.dark-mode .dropdown select {
-    background-color: #333; /* Fundo escuro para dropdown */
-    color: #e0e0e0; /* Cor do texto do dropdown */
-}
-
-/* Alternando entre os modos */
-body.dark-mode #toggleTheme {
-    background-color: #dc3545;
-}
-
-body.dark-mode #toggleTheme:hover {
-    background-color: #c82333;
-}
-
-/* Cor das Labels no modo escuro */
-body.dark-mode label {
-    color: #f4f4f4;
-}
-
-textarea {
+/* Campos de texto e selects */
+input, select {
     width: 100%;
-    height: 80px;
+    padding: 10px;
     margin: 10px 0;
-    padding: 5px;
+    border: none;
+    border-radius: 5px;
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+    font-size: 1rem;
+    transition: all 0.3s ease;
 }
 
+input:focus, select:focus {
+    outline: none;
+    background: rgba(255, 255, 255, 0.4);
+    box-shadow: 0 0 10px #4a90e2;
+}
+
+/* Multiselect */
+select[multiple] {
+    height: 120px;
+}
+
+/* Grupos de campos */
 .field-group {
     display: flex;
+    justify-content: space-between;
     gap: 10px;
     margin-bottom: 10px;
 }
 
-.field-group input {
+.field-name, .field-value {
     flex: 1;
-    padding: 5px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 10px;
+    color: #fff;
 }
 
-#addField {
-    background-color: #28a745;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    padding: 5px 10px;
-    cursor: pointer;
-    margin-top: 10px;
-}
-
-#addField:hover {
-    background-color: #218838;
-}
-
-/* Tabela de Resultados */
+/* Tabela de resultados */
 .result-table {
     width: 100%;
     border-collapse: collapse;
@@ -175,30 +131,12 @@ textarea {
 }
 
 .result-table th, .result-table td {
-    border: 1px solid #ddd;
-    text-align: left;
+    border: 1px solid rgba(255, 255, 255, 0.2);
     padding: 8px;
+    text-align: left;
 }
 
 .result-table th {
-    background-color: #f2f2f2;
+    background: rgba(255, 255, 255, 0.2);
     font-weight: bold;
-}
-
-.result-table tr:nth-child(even) {
-    background-color: #f9f9f9;
-}
-
-.result-table tr:hover {
-    background-color: #f1f1f1;
-}
-
-/* Botões de editar e excluir */
-button#editButton, button#deleteButton {
-    background-color: #ff6f61;
-    margin-top: 10px;
-}
-
-button#editButton:hover, button#deleteButton:hover {
-    background-color: #e55b50;
 }

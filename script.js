@@ -1,251 +1,379 @@
-// Dados simulados
 const tabelas = {
     biblioteca: [
         { id: 1, titulo: 'Dom Quixote', autor: 'Miguel de Cervantes', ano: 1605 },
         { id: 2, titulo: 'O Senhor dos Anéis', autor: 'J.R.R. Tolkien', ano: 1954 },
     ],
     autores: [
-        { id: 1, nome: 'Miguel de Cervantes', pais: 'Espanha', nascimento: 1547, escolaId: 1 },
-        { id: 2, nome: 'J.R.R. Tolkien', pais: 'Inglaterra', nascimento: 1892, escolaId: 2 },
+        { id: 1, nome: 'Miguel de Cervantes', pais: 'Espanha', nascimento: 1547 },
+        { id: 2, nome: 'J.R.R. Tolkien', pais: 'Inglaterra', nascimento: 1892 },
     ],
-    escolas: [
-        { id: 1, nome: 'Escola de Igarassu', cidade: 'Igarassu' },
-        { id: 2, nome: 'Escola de Luxemburgo', cidade: 'Bonnevue' },
-    ]
 };
 
-// Controle do próximo ID para cada tabela
 const nextId = {
     biblioteca: 3,
     autores: 3,
-    escolas: 3,
 };
 
-// Função para alternar entre os temas
+// Alternar modo escuro
 document.getElementById('toggleTheme').addEventListener('click', function () {
     document.body.classList.toggle('dark-mode');
-    const themeText = document.body.classList.contains('dark-mode') ? 'Modo Claro' : 'Modo Escuro';
-    this.textContent = themeText;
+    this.textContent = document.body.classList.contains('dark-mode') ? 'Modo Claro' : 'Modo Escuro';
 });
 
-// Função para carregar as tabelas no dropdown
+// Carregar tabelas no dropdown
 function carregarTabelas() {
-    const tabelaSelect = document.getElementById('table');
+    const tableSelect = document.getElementById('table');
+    tableSelect.innerHTML = ''; // Limpar opções antigas
+
     Object.keys(tabelas).forEach((tabela) => {
         const option = document.createElement('option');
         option.value = tabela;
         option.textContent = tabela.charAt(0).toUpperCase() + tabela.slice(1);
-        tabelaSelect.appendChild(option);
+        tableSelect.appendChild(option);
     });
 }
 
-// Atualiza os campos de acordo com a tabela selecionada
+// Atualizar campos com base na tabela selecionada
 function atualizarCampos() {
     const tabelaSelecionada = document.getElementById('table').value;
-    const camposSelect = document.getElementById('fields');
-    camposSelect.innerHTML = ''; // Limpa os campos anteriores
+    const fieldsSelect = document.getElementById('fields');
+    fieldsSelect.innerHTML = ''; // Limpar campos antigos
 
-    if (tabelaSelecionada && tabelas[tabelaSelecionada]) {
-        const campos = Object.keys(tabelas[tabelaSelecionada][0]);
-        campos.forEach((campo) => {
+    if (tabelas[tabelaSelecionada]) {
+        Object.keys(tabelas[tabelaSelecionada][0]).forEach((campo) => {
             const option = document.createElement('option');
             option.value = campo;
-            option.textContent = campo;
-            camposSelect.appendChild(option);
+            option.textContent = campo.charAt(0).toUpperCase() + campo.slice(1);
+            fieldsSelect.appendChild(option);
         });
     }
 }
 
-// Atualiza as opções de JOIN conforme a tabela selecionada
-function atualizarJoins() {
-    const tabelaSelecionada = document.getElementById('table').value;
-    const joinSelect = document.getElementById('join');
-    joinSelect.innerHTML = '<option value="">Nenhum</option>'; // Limpa os joins anteriores
+// Criar nova tabela
+function criarNovaTabela() {
+    const nomeTabela = document.getElementById('newTableName').value.trim();
+    const fields = Array.from(document.querySelectorAll('.field-group')).map((group) => {
+        const nome = group.querySelector('.field-name').value.trim();
+        const valor = group.querySelector('.field-value').value.trim();
+        return { [nome]: valor };
+    });
 
-    if (tabelaSelecionada === 'biblioteca') {
-        joinSelect.innerHTML += '<option value="biblioteca.id=autores.id">Biblioteca.ID = Autores.ID</option>';
-    } else if (tabelaSelecionada === 'autores') {
-        joinSelect.innerHTML += '<option value="autores.escolaId=escolas.id">Autores.EscolaID = Escolas.ID</option>';
-        joinSelect.innerHTML += '<option value="autores.id=biblioteca.id">Autores.ID = Biblioteca.ID</option>';
-    } else if (tabelaSelecionada === 'escolas') {
-        joinSelect.innerHTML += '<option value="autores.escolaId=escolas.id">Autores.EscolaID = Escolas.ID</option>';
+    if (!nomeTabela || fields.length === 0) {
+        alert('Preencha o nome da tabela e pelo menos um campo!');
+        return;
     }
+
+    const novoRegistro = fields.reduce((obj, field) => ({ ...obj, ...field }), {});
+    const idTabela = nextId[nomeTabela] || 1;
+    nextId[nomeTabela] = idTabela + 1;
+
+    tabelas[nomeTabela] = [
+        { id: idTabela, ...novoRegistro }
+    ];
+
+    carregarTabelas();
+    alert(`Tabela "${nomeTabela}" criada com sucesso!`);
+
+    // Limpar campos após criar a tabela, mantendo apenas o primeiro
+    document.getElementById('newTableName').value = ''; // Limpar nome da tabela
+
+    const fieldGroups = document.querySelectorAll('.field-group');
+    fieldGroups.forEach((group, index) => {
+        if (index > 0) {
+            group.remove(); // Remover os campos adicionais
+        } else {
+            // Limpar o primeiro campo (nome e valor)
+            group.querySelector('.field-name').value = '';
+            group.querySelector('.field-value').value = '';
+        }
+    });
 }
 
-// Função para realizar o SELECT simples
-function selectSimples(tabela, campos) {
-    return tabela.map((registro) =>
-        campos.reduce((obj, campo) => {
-            if (campo in registro) {
-                obj[campo] = registro[campo];
-            }
-            return obj;
-        }, {})
-    );
-}
+// Adicionar novo campo
+document.getElementById('addField').addEventListener('click', function() {
+    const container = document.getElementById('fieldContainer');
+    const fieldGroup = document.createElement('div');
+    fieldGroup.classList.add('field-group');
 
-// Função de JOIN
-function joinTables(tabela1, tabela2, campo1, campo2) {
-    return tabela1.flatMap((registro1) =>
-        tabela2
-            .filter((registro2) => registro1[campo1] === registro2[campo2])
-            .map((registro2) => ({ ...registro1, ...registro2 }))
-    );
-}
+    const inputNome = document.createElement('input');
+    inputNome.classList.add('field-name');
+    inputNome.placeholder = 'Nome do Campo';
 
-// Executa a consulta
+    const inputValor = document.createElement('input');
+    inputValor.classList.add('field-value');
+    inputValor.placeholder = 'Valor do Campo';
+
+    fieldGroup.appendChild(inputNome);
+    fieldGroup.appendChild(inputValor);
+    container.appendChild(fieldGroup);
+});
+
+// Executar consulta
 function executarConsulta() {
     const tabelaSelecionada = document.getElementById('table').value;
     const camposSelecionados = Array.from(document.getElementById('fields').selectedOptions).map((o) => o.value);
-    const joinSelecionado = document.getElementById('join').value;
     const resultDiv = document.getElementById('result');
-
-    resultDiv.innerHTML = ''; // Limpa os resultados anteriores
+    resultDiv.innerHTML = ''; // Limpar resultados anteriores
 
     if (!tabelaSelecionada || camposSelecionados.length === 0) {
-        resultDiv.textContent = 'Por favor, selecione uma tabela e pelo menos um campo.';
+        resultDiv.textContent = 'Selecione uma tabela e pelo menos um campo.';
         return;
     }
 
-    let resultado;
-    try {
-        if (joinSelecionado) {
-            const [campo1, campo2] = joinSelecionado.split('=').map((c) => c.trim());
-            resultado = joinTables(tabelas.biblioteca, tabelas.autores, campo1.split('.')[1], campo2.split('.')[1]);
-        } else {
-            resultado = selectSimples(tabelas[tabelaSelecionada], camposSelecionados);
-        }
+    const resultado = tabelas[tabelaSelecionada].map((registro) =>
+        camposSelecionados.reduce((obj, campo) => {
+            obj[campo] = registro[campo];
+            return obj;
+        }, {}));
 
-        if (resultado.length === 0) {
-            resultDiv.textContent = 'Nenhum resultado encontrado.';
-        } else {
-            const table = document.createElement('table');
-            table.classList.add('result-table');
+    if (resultado.length === 0) {
+        resultDiv.textContent = 'Nenhum resultado encontrado.';
+    } else {
+        const table = document.createElement('table');
+        table.classList.add('result-table');
+        const headerRow = document.createElement('tr');
+        camposSelecionados.forEach((campo) => {
+            const th = document.createElement('th');
+            th.textContent = campo.charAt(0).toUpperCase() + campo.slice(1);
+            headerRow.appendChild(th);
+        });
+        table.appendChild(headerRow);
 
-            // Cabeçalho da tabela
-            const headerRow = document.createElement('tr');
+        resultado.forEach((registro, index) => {
+            const row = document.createElement('tr');
             camposSelecionados.forEach((campo) => {
-                const th = document.createElement('th');
-                th.textContent = campo.charAt(0).toUpperCase() + campo.slice(1);
-                headerRow.appendChild(th);
-            });
-            table.appendChild(headerRow);
-
-            // Dados da tabela
-            resultado.forEach((registro) => {
-                const row = document.createElement('tr');
-                camposSelecionados.forEach((campo) => {
-                    const td = document.createElement('td');
-                    td.textContent = registro[campo] !== undefined ? registro[campo] : '-';
-                    row.appendChild(td);
-                });
-                table.appendChild(row);
+                const td = document.createElement('td');
+                td.textContent = registro[campo] || '-';
+                row.appendChild(td);
             });
 
-            resultDiv.appendChild(table);
-        }
-    } catch (error) {
-        resultDiv.textContent = `Erro: ${error.message}`;
+            // Adicionar botão de editar
+            const editButton = document.createElement('button');
+            editButton.textContent = 'Editar';
+            editButton.onclick = () => editarRegistro(tabelaSelecionada, index);
+            const tdEdit = document.createElement('td');
+            tdEdit.appendChild(editButton);
+
+            // Adicionar botão de excluir
+            const deleteButton = document.createElement('button');
+            deleteButton.textContent = 'Excluir';
+            deleteButton.onclick = () => deletarRegistro(tabelaSelecionada, index);
+            const tdDelete = document.createElement('td');
+            tdDelete.appendChild(deleteButton);
+
+            row.appendChild(tdEdit);
+            row.appendChild(tdDelete);
+
+            table.appendChild(row);
+        });
+
+        resultDiv.appendChild(table);
     }
 }
 
-// Criação de uma nova tabela
-function criarNovaTabela() {
-    const nomeTabela = document.getElementById('newTableName').value.trim();
-    const fieldGroups = document.querySelectorAll('.field-group');
-    const foreignKeyGroups = document.querySelectorAll('.foreign-key-group');
+// Editar registro, incluindo a possibilidade de adicionar campos, editar o nome da tabela e adicionar registros
+function editarRegistro(tabelaNome, index) {
+    const registro = tabelas[tabelaNome][index];
+    const campos = Object.keys(registro);
 
-    if (!nomeTabela || fieldGroups.length === 0) {
-        alert('Por favor, insira um nome para a tabela e pelo menos um campo.');
+    let editForm = `
+        <div>
+            <label for="novoNomeTabela">Novo Nome da Tabela:</label>
+            <input type="text" id="novoNomeTabela" value="${tabelaNome}" />
+        </div>
+        <h3>Editar Registro</h3>
+    `;
+
+    campos.forEach(campo => {
+        editForm += `
+            <div>
+                <label for="${campo}">${campo.charAt(0).toUpperCase() + campo.slice(1)}:</label>
+                <input type="text" id="${campo}" value="${registro[campo]}" />
+            </div>
+        `;
+    });
+
+    editForm += `
+        <button onclick="adicionarCampo('${tabelaNome}')">Adicionar Novo Campo</button>
+        <div id="novoCampoContainer"></div>
+        <h3>Adicionar Novo Registro</h3>
+        <div id="novoRegistroContainer"></div>
+        <button onclick="adicionarRegistro('${tabelaNome}')">Adicionar Novo Registro</button>
+        <button onclick="salvarEdicao('${tabelaNome}', ${index})">Salvar</button>
+    `;
+
+    const resultDiv = document.getElementById('result');
+    resultDiv.innerHTML = editForm;
+}
+
+// Adicionar um novo campo ao formulário de edição
+function adicionarCampo(tabelaNome) {
+    const container = document.getElementById('novoCampoContainer');
+    const novoCampo = document.createElement('div');
+
+    novoCampo.innerHTML = `
+        <label>Nome do Novo Campo:</label>
+        <input type="text" class="novoCampoNome" placeholder="Nome do Campo" />
+        <label>Valor Padrão:</label>
+        <input type="text" class="novoCampoValor" placeholder="Valor Padrão" />
+    `;
+
+    container.appendChild(novoCampo);
+}
+
+// Adicionar um novo registro à tabela
+function adicionarRegistro(tabelaNome) {
+    const container = document.getElementById('novoRegistroContainer');
+    const novoRegistro = document.createElement('div');
+    const camposExistentes = Object.keys(tabelas[tabelaNome][0]);
+
+    novoRegistro.classList.add('novo-registro');
+    camposExistentes.forEach(campo => {
+        novoRegistro.innerHTML += `
+            <label for="${campo}">${campo.charAt(0).toUpperCase() + campo.slice(1)}:</label>
+            <input type="text" class="novoRegistroCampo" data-campo="${campo}" placeholder="Valor para ${campo}" />
+        `;
+    });
+
+    container.appendChild(novoRegistro);
+}
+
+// Salvar edições na tabela
+function salvarEdicao(tabelaNome, index) {
+    const registro = tabelas[tabelaNome][index];
+    const campos = Object.keys(registro);
+
+    // Atualizar o nome da tabela
+    const novoNomeTabela = document.getElementById('novoNomeTabela').value.trim();
+    if (novoNomeTabela && novoNomeTabela !== tabelaNome) {
+        tabelas[novoNomeTabela] = tabelas[tabelaNome];
+        delete tabelas[tabelaNome];
+        tabelaNome = novoNomeTabela;
+        alert('Nome da tabela atualizado com sucesso!');
+    }
+
+    // Atualizar campos do registro atual
+    campos.forEach(campo => {
+        const novoValor = document.getElementById(campo).value;
+        registro[campo] = novoValor;
+    });
+
+    // Adicionar novos campos à tabela
+    const novosCampos = document.querySelectorAll('#novoCampoContainer .novoCampoNome');
+    novosCampos.forEach((campoEl, i) => {
+        const nomeCampo = campoEl.value.trim();
+        const valorPadrao = document.querySelectorAll('#novoCampoContainer .novoCampoValor')[i].value.trim();
+        if (nomeCampo) {
+            tabelas[tabelaNome].forEach(registro => {
+                registro[nomeCampo] = valorPadrao;
+            });
+        }
+    });
+
+    // Adicionar novos registros
+    const novosRegistros = document.querySelectorAll('.novo-registro');
+    novosRegistros.forEach(registroEl => {
+        const novoRegistro = {};
+        const campos = registroEl.querySelectorAll('.novoRegistroCampo');
+        campos.forEach(campoEl => {
+            const nomeCampo = campoEl.dataset.campo;
+            novoRegistro[nomeCampo] = campoEl.value.trim();
+        });
+
+        if (Object.values(novoRegistro).some(val => val)) {
+            novoRegistro.id = nextId[tabelaNome]++;
+            tabelas[tabelaNome].push(novoRegistro);
+        }
+    });
+
+    alert('Alterações salvas com sucesso!');
+    carregarTabelas(); // Atualizar dropdown de tabelas
+    executarConsulta(); // Mostrar alterações
+}
+
+
+// Função para deletar registro
+function deletarRegistro(tabelaNome, index) {
+    if (confirm('Tem certeza que deseja excluir este registro?')) {
+        tabelas[tabelaNome].splice(index, 1); // Remove o registro da tabela
+        alert('Registro excluído com sucesso!');
+        executarConsulta(); // Re-executar a consulta para atualizar a visualização
+    }
+}
+function excluirTabela() {
+    const tabelaSelecionada = document.getElementById('table').value;
+
+    // Verifica se uma tabela foi selecionada
+    if (!tabelaSelecionada) {
+        alert('Selecione uma tabela para excluir.');
         return;
     }
 
-    const campos = [];
-    const registros = {};
-    const foreignKeys = [];
+    // Confirmação antes de excluir a tabela
+    if (confirm(`Tem certeza que deseja excluir a tabela "${tabelaSelecionada}"?`)) {
+        // Exclui a tabela do objeto 'tabelas' e 'nextId'
+        delete tabelas[tabelaSelecionada];
+        delete nextId[tabelaSelecionada];
 
-    // Processando campos
-    fieldGroups.forEach((group) => {
-        const fieldName = group.querySelector('.field-name').value.trim();
-        const fieldValue = group.querySelector('.field-value').value.trim();
+        // Atualiza o dropdown para refletir a exclusão
+        carregarTabelas();
 
-        if (fieldName && fieldValue) {
-            campos.push(fieldName);
-            registros[fieldName] = fieldValue;
-        }
-    });
+        // Exibe uma mensagem de sucesso
+        alert(`Tabela "${tabelaSelecionada}" excluída com sucesso!`);
+    }
+}
+function buscarInformacao() {
+    const valorBusca = document.getElementById('searchValue').value.trim();
+    const searchResultsDiv = document.getElementById('searchResults');
+    searchResultsDiv.innerHTML = ''; // Limpar resultados anteriores
 
-    // Processando chaves estrangeiras
-    foreignKeyGroups.forEach((group) => {
-        const column = group.querySelector('.foreign-key-column').value.trim();
-        const refTable = group.querySelector('.foreign-key-ref').value.trim();
-        const refColumn = group.querySelector('.foreign-key-ref-column').value.trim();
-
-        if (column && refTable && refColumn) {
-            foreignKeys.push({ column, refTable, refColumn });
-        }
-    });
-
-    if (campos.length === 0) {
-        alert('Insira pelo menos um campo válido.');
+    if (!valorBusca) {
+        alert('Por favor, insira um valor para buscar.');
         return;
     }
 
-    try {
-        if (tabelas[nomeTabela]) {
-            alert('Uma tabela com este nome já existe.');
-            return;
-        }
+    const resultadosEncontrados = [];
 
-        tabelas[nomeTabela] = [registros];
-        if (foreignKeys.length > 0) {
-            tabelas[nomeTabela]._foreignKeys = foreignKeys;
-        }
+    // Percorrer todas as tabelas
+    Object.keys(tabelas).forEach(tabelaNome => {
+        tabelas[tabelaNome].forEach(registro => {
+            // Verificar se algum valor no registro contém o valor buscado
+            if (Object.values(registro).some(value => value.toString().includes(valorBusca))) {
+                resultadosEncontrados.push({ tabela: tabelaNome, registro });
+            }
+        });
+    });
 
-        atualizarDropdownTabelas();
-        alert(`Tabela "${nomeTabela}" criada com sucesso!`);
-        limparFormularioCriacao();
-    } catch (error) {
-        alert('Erro ao criar a tabela.');
+    // Mostrar resultados
+    if (resultadosEncontrados.length === 0) {
+        searchResultsDiv.textContent = 'Nenhum resultado encontrado.';
+    } else {
+        const resultsTable = document.createElement('table');
+        resultsTable.classList.add('result-table');
+
+        // Criar cabeçalho da tabela de resultados
+        const headerRow = document.createElement('tr');
+        headerRow.innerHTML = '<th>Tabela</th><th>Registro</th>';
+        resultsTable.appendChild(headerRow);
+
+        resultadosEncontrados.forEach(({ tabela, registro }) => {
+            const row = document.createElement('tr');
+            const tdTabela = document.createElement('td');
+            tdTabela.textContent = tabela;
+            const tdRegistro = document.createElement('td');
+            tdRegistro.textContent = JSON.stringify(registro); // Exibir o registro como JSON para simplicidade
+            row.appendChild(tdTabela);
+            row.appendChild(tdRegistro);
+            resultsTable.appendChild(row);
+        });
+
+        searchResultsDiv.appendChild(resultsTable);
     }
 }
 
-// Limpa o formulário após criar uma tabela
-function limparFormularioCriacao() {
-    document.getElementById('newTableName').value = '';
-    const fieldContainer = document.getElementById('fieldContainer');
-    fieldContainer.innerHTML = '';
-    document.getElementById('foreignKeyContainer').innerHTML = '';
-}
 
-// Atualiza o dropdown de tabelas
-function atualizarDropdownTabelas() {
-    const editTableSelect = document.getElementById('editTable');
-    editTableSelect.innerHTML = '<option value="">Selecione uma Tabela</option>'; // Limpa a lista
-
-    Object.keys(tabelas).forEach((tabela) => {
-        const option = document.createElement('option');
-        option.value = tabela;
-        option.textContent = tabela.charAt(0).toUpperCase() + tabela.slice(1);
-        editTableSelect.appendChild(option);
-    });
-}
-
-// Inicializa o sistema
+// Inicializar
 document.addEventListener('DOMContentLoaded', () => {
     carregarTabelas();
-    atualizarCampos();
-    atualizarJoins();
-
-    // Evento de mudança na tabela selecionada
-    document.getElementById('table').addEventListener('change', function () {
-        atualizarCampos();
-        atualizarJoins();
-    });
-
-    // Executar consulta ao clicar no botão
-    document.getElementById('runQuery').addEventListener('click', executarConsulta);
-
-    // Criar nova tabela
-    document.getElementById('createTable').addEventListener('click', criarNovaTabela);
+    document.getElementById('table').addEventListener('change', atualizarCampos);
 });
